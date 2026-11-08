@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Forgiveness Ledger</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --card: #1a2332;
+    --accent: #4ade80;
+    --danger: #f87171;
+    --gold: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { text-align: center; color: var(--accent); margin-bottom: 0.3em; }
+  h2 { color: var(--gold); border-bottom: 1px solid #334155; padding-bottom: 6px; }
+  .intro, .scenario { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .kid-example { background: #162032; padding: 16px; border-radius: 8px; margin: 12px 0; }
+  .accounts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .account {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 180px;
+  }
+  .account h3 { margin: 0 0 8px 0; font-size: 1rem; color: var(--accent); }
+  .account.god h3 { color: var(--gold); }
+  .entry { font-family: ui-monospace, monospace; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid #1e293b; }
+  .entry .dr { color: #60a5fa; }
+  .entry .cr { color: #f472b6; }
+  .balance { margin-top: 10px; font-weight: bold; padding-top: 8px; border-top: 1px dashed #475569; }
+  .harms {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .person {
+    text-align: center;
+    background: #1e293b;
+    padding: 16px;
+    border-radius: 12px;
+    min-width: 140px;
+  }
+  .icon { font-size: 3rem; display: block; margin-bottom: 8px; transition: transform 0.3s; }
+  .injured .icon { animation: shake 0.5s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .sin-badge, .injury-badge {
+    display: inline-block;
+    background: var(--danger);
+    color: white;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    margin: 2px;
+  }
+  .clear-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #0f172a;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+  }
+  button {
+    background: #334155;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 6px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button:hover { background: #475569; }
+  button.primary { background: var(--accent); color: #0f172a; font-weight: 600; }
+  button.primary:hover { background: #22c55e; }
+  button.danger { background: var(--danger); }
+  button.danger:hover { background: #ef4444; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .controls { text-align: center; margin: 20px 0; }
+  .message {
+    background: #1e3a2f;
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .message.warn { background: #3a1e1e; border-left-color: var(--danger); }
+  .hidden { display: none; }
+  .transfer {
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin: 10px 0;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>The Forgiveness Ledger</h1>
+  <p style="text-align:center; color:var(--muted);">A visual way to see why handing the claim to God keeps the books clean</p>
+
+  <div class="intro">
+    <h2>Quick Intro to Double-Entry Accounting</h2>
+    <p>Double-entry accounting means every action is written down in <strong>two places</strong> so the books always stay balanced. One side is a <span class="dr">Debit (Dr)</span>, the other is a <span class="cr">Credit (Cr)</span>. They always match.</p>
+    
+    <div class="kid-example">
+      <strong>Example a 4th–6th grader gets:</strong><br>
+      You have 10 trading cards. You trade 3 cards to a friend for a cool sticker.<br><br>
+      <div class="entry"><span class="dr">Dr</span> Sticker (you gained something) &nbsp;&nbsp; 3</div>
+      <div class="entry"><span class="cr">Cr</span> Trading Cards (you gave something up) &nbsp; 3</div>
+      <p style="margin:8px 0 0 0;">Your total stuff still equals what you started with — just in a different form. Nothing appears or disappears without a matching entry.</p>
+    </div>
+    <p>In this app we use the same idea for harms, sins, and claims. Every hit or choice creates matching entries on the ledgers.</p>
+  </div>
+
+  <div class="scenario">
+    <h2>The Scenario</h2>
+    <p>Someone hits you. In the old “eye for an eye” way of thinking, you now hold a claim — they “owe” you a hit back. But the Bible says vengeance belongs to God, and we are not to repay evil for evil.</p>
+
+    <div class="harms" id="harmVisual">
+      <div class="person" id="youVisual">
+        <span class="icon">🙂</span>
+        <div><strong>You</strong></div>
+        <div id="youStatus"><span class="clear-badge">At peace</span></div>
+      </div>
+      <div class="person" id="otherVisual">
+        <span class="icon">🙂</span>
+        <div><strong>Other Person</strong></div>
+        <div id="otherStatus"><span class="clear-badge">At peace</span></div>
+      </div>
+      <div class="person god">
+        <span class="icon">✝️</span>
+        <div><strong>God</strong></div>
+        <div id="godStatus"><span class="clear-badge">Holds justice</span></div>
+      </div>
+    </div>
+
+    <div class="accounts" id="ledgers">
+      <div class="account" id="youAccount">
+        <h3>You</h3>
+        <div id="youEntries"></div>
+        <div class="balance" id="youBalance">Balance: Clear</div>
+      </div>
+      <div class="account god" id="godYouAccount">
+        <h3>God–You</h3>
+        <div id="godYouEntries"></div>
+        <div class="balance" id="godYouBalance">Balance: Clear</div>
+      </div>
+      <div class="account" id="otherAccount">
+        <h3>Other Person</h3>
+        <div id="otherEntries"></div>
+        <div class="balance" id="otherBalance">Balance: Clear</div>
+      </div>
+      <div class="account god" id="godOtherAccount">
+        <h3>God–Other</h3>
+        <div id="godOtherEntries"></div>
+        <div class="balance" id="godOtherBalance">Balance: Clear</div>
+      </div>
+    </div>
+
+    <div id="transferAnim" class="transfer hidden">Claim moving to God… ✝️</div>
+
+    <div id="messageBox" class="message">Ready. Press the button to begin.</div>
+
+    <div class="controls">
+      <button id="btnHit" class="danger" onclick="otherHits()">Other Person Hits You</button>
+      <button id="btnRetaliate" class="danger" onclick="retaliate()" disabled>Hit Them Back</button>
+      <button id="btnForgive" class="primary" onclick="forgive()" disabled>Give the Claim to God (Forgive)</button>
+      <button id="btnReset" onclick="reset()">Reset</button>
+    </div>
+  </div>
+
+  <footer>
+    Based on Romans 12:17–21 and Matthew 5:38–39.<br>
+    “Do not repay anyone evil for evil… Do not be overcome by evil, but overcome evil with good.”
+  </footer>
+</div>
+
+<script>
+const state = {
+  phase: 0, // 0=start, 1=hit, 2=done
+  forgiven: false,
+  heartHealed: false,
+  you: { injury: 0, sin: 0, claim: 0 },
+  other: { injury: 0, sin: 0, claim: 0 },
+  godYou: { claim: 0, sin: 0, entrusted: 0 },
+  godOther: { claim: 0, sin: 0 }
+};
+
+function updateVisuals() {
+  const youVis = document.getElementById('youVisual');
+  const otherVis = document.getElementById('otherVisual');
+  const youStatus = document.getElementById('youStatus');
+  const otherStatus = document.getElementById('otherStatus');
+  const godStatus = document.getElementById('godStatus');
+
+  // You
+  youVis.className = 'person' + (state.you.injury && !state.heartHealed ? ' injured' : '');
+  if (state.heartHealed) {
+    youVis.querySelector('.icon').textContent = state.you.injury ? '💖🤕' : '💖';
+  } else {
+    youVis.querySelector('.icon').textContent = state.you.injury ? '🤕' : '🙂';
+  }
+  let youBadges = '';
+  if (state.you.injury) youBadges += '<span class="injury-badge">Physical injury</span>';
+  if (state.you.sin) youBadges += '<span class="sin-badge">Sin of retaliation</span>';
+  if (state.you.claim) youBadges += '<span class="injury-badge">Holding claim</span>';
+  if (state.heartHealed) youBadges += '<span class="clear-badge">Healed in heart by God</span>';
+  else if (!state.you.injury && !state.you.sin && !state.you.claim) youBadges = '<span class="clear-badge">Clear</span>';
+  youStatus.innerHTML = youBadges;
+
+  // Other (person being forgiven)
+  otherVis.className = 'person' + (state.other.injury ? ' injured' : '');
+  otherVis.querySelector('.icon').textContent = state.other.injury ? '🤕' : (state.forgiven ? '🙏' : '🙂');
+  let otherBadges = '';
+  if (state.other.injury) otherBadges += '<span class="injury-badge">Injury</span>';
+  if (state.other.sin) otherBadges += '<span class="sin-badge">Sin of violence</span>';
+  if (state.forgiven) otherBadges = '<span class="clear-badge">Forgiven – balance even</span>';
+  else if (!state.other.injury && !state.other.sin) otherBadges = '<span class="clear-badge">At peace</span>';
+  otherStatus.innerHTML = otherBadges;
+
+  // God – only God handles the positives and negatives after forgiveness
+  if (state.forgiven) {
+    godStatus.innerHTML = '<span class="clear-badge">Handling both sides</span>';
+  } else if (state.godYou.entrusted || state.godYou.claim || state.godOther.sin) {
+    godStatus.innerHTML = '<span class="clear-badge">Holds the claim & justice</span>';
+  } else {
+    godStatus.innerHTML = '<span class="clear-badge">Holds justice</span>';
+  }
+}
+
+function renderLedgers() {
+  // You
+  let youHtml = '';
+  if (state.you.injury) youHtml += `<div class="entry"><span class="dr">Dr</span> Physical injury suffered &nbsp; ${state.you.injury}</div>`;
+  if (state.you.sin) youHtml += `<div class="entry"><span class="dr">Dr</span> Sin of retaliation &nbsp; ${state.you.sin}</div>`;
+  if (state.you.claim) youHtml += `<div class="entry"><span class="dr">Dr</span> Claim held &nbsp; ${state.you.claim}</div>`;
+  if (state.heartHealed) youHtml += `<div class="entry" style="color:var(--accent)"><span class="cr">Cr</span> Heart healed by God &nbsp; (inner peace)</div>`;
+  document.getElementById('youEntries').innerHTML = youHtml || '<div class="entry" style="color:var(--muted)">No entries</div>';
+  const youBal = state.you.injury + state.you.sin + state.you.claim;
+  document.getElementById('youBalance').textContent = state.heartHealed 
+    ? (state.you.injury ? 'Physical injury remains · Heart: Healed by God' : 'Balance: Clear · Heart: Healed') 
+    : (youBal ? `Open items: ${youBal}` : 'Balance: Clear');
+
+  // God-You
+  let gyHtml = '';
+  if (state.godYou.claim) gyHtml += `<div class="entry"><span class="cr">Cr</span> Justice claim held &nbsp; ${state.godYou.claim}</div>`;
+  if (state.godYou.entrusted) gyHtml += `<div class="entry"><span class="dr">Dr</span> Vengeance entrusted &nbsp; ${state.godYou.entrusted}</div>`;
+  if (state.godYou.sin) gyHtml += `<div class="entry"><span class="cr">Cr</span> Sin debt owed &nbsp; ${state.godYou.sin}</div>`;
+  document.getElementById('godYouEntries').innerHTML = gyHtml || '<div class="entry" style="color:var(--muted)">No entries</div>';
+  document.getElementById('godYouBalance').textContent = (state.godYou.claim || state.godYou.entrusted || state.godYou.sin) ? 'Active' : 'Clear';
+
+  // Other (person being forgiven)
+  let oHtml = '';
+  if (state.other.sin) oHtml += `<div class="entry"><span class="dr">Dr</span> Sin of violence &nbsp; ${state.other.sin}</div>`;
+  if (state.other.injury) oHtml += `<div class="entry"><span class="dr">Dr</span> Injury suffered &nbsp; ${state.other.injury}</div>`;
+  if (state.forgiven) oHtml += `<div class="entry" style="color:var(--accent)"><span class="cr">Cr</span> Claim released to God &nbsp; (balance even)</div>`;
+  document.getElementById('otherEntries').innerHTML = oHtml || '<div class="entry" style="color:var(--muted)">No entries</div>';
+  const oBal = state.other.sin + state.other.injury;
+  document.getElementById('otherBalance').textContent = state.forgiven ? 'Balance: Even (claim with God)' : (oBal ? `Open items: ${oBal}` : 'Balance: Clear');
+
+  // God-Other – God holds the negative
+  let goHtml = '';
+  if (state.godOther.sin) goHtml += `<div class="entry"><span class="cr">Cr</span> Sin debt owed &nbsp; ${state.godOther.sin}</div>`;
+  if (state.godOther.claim) goHtml += `<div class="entry"><span class="cr">Cr</span> Justice claim held &nbsp; ${state.godOther.claim}</div>`;
+  if (state.forgiven && state.godOther.sin) goHtml += `<div class="entry" style="color:var(--gold)">God holds the negative side</div>`;
+  document.getElementById('godOtherEntries').innerHTML = goHtml || '<div class="entry" style="color:var(--muted)">No entries</div>';
+  document.getElementById('godOtherBalance').textContent = (state.godOther.sin || state.godOther.claim) ? (state.forgiven ? 'God handling negative' : 'Active') : 'Clear';
+}
+
+function setMessage(text, warn = false) {
+  const box = document.getElementById('messageBox');
+  box.textContent = text;
+  box.className = 'message' + (warn ? ' warn' : '');
+}
+
+function otherHits() {
+  if (state.phase !== 0) return;
+  state.phase = 1;
+  state.other.sin = 1;
+  state.godOther.sin = 1;
+  state.you.injury = 1;
+  state.you.claim = 1;
+  state.godYou.claim = 1;
+
+  updateVisuals();
+  renderLedgers();
+  setMessage('Other person hit you. A claim now exists on your books and on God–You. You can try to collect it yourself… or hand it to God.');
+
+  document.getElementById('btnHit').disabled = true;
+  document.getElementById('btnRetaliate').disabled = false;
+  document.getElementById('btnForgive').disabled = false;
+}
+
+function retaliate() {
+  if (state.phase !== 1) return;
+  state.phase = 2;
+  state.you.sin = 1;
+  state.godYou.sin = 1;
+  state.other.injury = 1;
+  state.godOther.claim = 1;
+  // Claim is "settled" humanly but new entries appear
+  state.you.claim = 0;
+  state.godYou.claim = 0;
+
+  updateVisuals();
+  renderLedgers();
+  setMessage('You hit them back. The original claim looks settled, but now both of you have injuries and both have sin on the books. The total harm increased. Debits still equal credits — the books balance, but everything is worse.', true);
+
+  document.getElementById('btnRetaliate').disabled = true;
+  document.getElementById('btnForgive').disabled = true;
+}
+
+function forgive() {
+  if (state.phase !== 1) return;
+  state.phase = 2;
+  state.forgiven = true;
+  state.heartHealed = true;
+
+  // Transfer the claim fully to God – personal books of the forgiven person become even
+  // You are healed in your heart by God even if physical injury remains
+  state.you.claim = 0;
+  state.godYou.claim = 0;
+  state.godYou.entrusted = 1;
+  state.other.sin = 0; // personal balance cleared / even
+
+  document.getElementById('transferAnim').classList.remove('hidden');
+  document.getElementById('transferAnim').textContent = 'Claim & debt to God… heart being healed by God 💖';
+  setTimeout(() => {
+    document.getElementById('transferAnim').classList.add('hidden');
+  }, 2200);
+
+  updateVisuals();
+  renderLedgers();
+  setMessage('You gave the claim to God. The person being forgiven has an even balance. Only God holds the negatives and positives. You are healed in your heart by God—even while any physical injury remains. Your personal books stay clear of bitterness and new sin.');
+
+  document.getElementById('btnRetaliate').disabled = true;
+  document.getElementById('btnForgive').disabled = true;
+}
+
+function reset() {
+  state.phase = 0;
+  state.forgiven = false;
+  state.heartHealed = false;
+  state.you = { injury: 0, sin: 0, claim: 0 };
+  state.other = { injury: 0, sin: 0, claim: 0 };
+  state.godYou = { claim: 0, sin: 0, entrusted: 0 };
+  state.godOther = { claim: 0, sin: 0 };
+
+  updateVisuals();
+  renderLedgers();
+  setMessage('Ready. Press the button to begin.');
+  document.getElementById('btnHit').disabled = false;
+  document.getElementById('btnRetaliate').disabled = true;
+  document.getElementById('btnForgive').disabled = true;
+  document.getElementById('transferAnim').classList.add('hidden');
+  document.getElementById('transferAnim').textContent = 'Claim moving to God… ✝️';
+}
+
+// Initial render
+updateVisuals();
+renderLedgers();
+</script>
+</body>
+</html>
